@@ -4,9 +4,9 @@ export default function SeverityBadge({ severity }) {
   const s = (severity || 'medium').toLowerCase()
 
   const config = {
-    low: { cls: 'badge-low', icon: ShieldCheck, label: 'Low' },
-    medium: { cls: 'badge-medium', icon: ShieldQuestion, label: 'Medium' },
-    high: { cls: 'badge-high', icon: ShieldAlert, label: 'High' },
+    low:    { cls: 'badge-low',    icon: ShieldCheck,    label: 'Low Risk'  },
+    medium: { cls: 'badge-medium', icon: ShieldQuestion, label: 'Medium'    },
+    high:   { cls: 'badge-high',   icon: ShieldAlert,    label: 'High Risk' },
   }
 
   const { cls, icon: Icon, label } = config[s] || config.medium

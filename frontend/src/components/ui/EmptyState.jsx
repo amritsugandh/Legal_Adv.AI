@@ -6,22 +6,33 @@ export default function EmptyState({ icon: Icon = FileX, title, description, chi
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-center py-20 text-center"
+      className="flex flex-col items-center justify-center py-24 text-center"
     >
       <div
-        className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
+        className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
         style={{
-          background: 'linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(0, 206, 201, 0.06))',
-          border: '1px solid rgba(108, 92, 231, 0.2)',
+          background: 'var(--th-icon-box-bg)',
+          border: '1px solid var(--th-icon-box-bd)',
+          boxShadow: '0 0 24px rgba(108,92,231,0.1)',
         }}
       >
-        <Icon className="w-6 h-6 text-[var(--color-text-muted)]" />
+        <Icon className="w-7 h-7" style={{ color: 'var(--color-aurora-purple)' }} />
       </div>
-      <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">{title}</h3>
+      <h3
+        className="text-lg font-bold mb-2.5"
+        style={{ color: 'var(--th-text-primary)' }}
+      >
+        {title}
+      </h3>
       {description && (
-        <p className="text-sm text-[var(--color-text-muted)] max-w-md mb-6 leading-relaxed">{description}</p>
+        <p
+          className="text-sm max-w-md leading-relaxed"
+          style={{ color: 'var(--th-text-muted)' }}
+        >
+          {description}
+        </p>
       )}
-      {children}
+      {children && <div className="mt-6">{children}</div>}
     </motion.div>
   )
 }
