@@ -259,12 +259,17 @@ async def get_full_analysis(document_id: str, db: AsyncSession = Depends(get_db)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    # Check cached analysis in database
+    # Check cached analysis in database — only use if it has real content
     result = await db.execute(
         select(AnalysisRecord).where(AnalysisRecord.document_id == document_id)
     )
     cached_analysis = result.scalar_one_or_none()
-    if cached_analysis:
+    has_content = cached_analysis and (
+        (cached_analysis.risks and len(cached_analysis.risks) > 0) or
+        (cached_analysis.obligations and len(cached_analysis.obligations) > 0) or
+        (cached_analysis.dates and len(cached_analysis.dates) > 0)
+    )
+    if has_content:
         return FullAnalysis(
             document_id=document_id,
             clauses=cached_analysis.clauses or [],
@@ -274,6 +279,10 @@ async def get_full_analysis(document_id: str, db: AsyncSession = Depends(get_db)
             legal_terms=cached_analysis.legal_terms or [],
             action_items=cached_analysis.action_items or [],
         )
+    # Delete stale empty cache if it exists
+    if cached_analysis:
+        await db.delete(cached_analysis)
+        await db.commit()
 
     # Compute analysis if not yet cached
     full_text = doc.full_text or ""
@@ -329,14 +338,26 @@ async def get_lawyer_prep_report(document_id: str, db: AsyncSession = Depends(ge
 
     report = await analysis_service.generate_lawyer_prep(full_text)
 
+    # Safely convert to dictionary for database persistence
+    if hasattr(report, "model_dump"):
+        report_data = report.model_dump()
+    elif isinstance(report, dict):
+        report_data = report
+    elif hasattr(report, "dict"):
+        report_data = report.dict()
+    else:
+        report_data = dict(report)
+
     # Cache into database
     prep_record = LawyerPrepRecord(
         document_id=document_id,
-        report_data=report.model_dump(),
+        report_data=report_data,
     )
     db.add(prep_record)
     await db.commit()
 
+    if isinstance(report, dict):
+        return LawyerPrepReport(**report)
     return report
 
 
@@ -417,6 +438,8 @@ async def export_lawyer_prep(document_id: str, db: AsyncSession = Depends(get_db
             if text_path.exists():
                 full_text = text_path.read_text(encoding="utf-8")
         report = await analysis_service.generate_lawyer_prep(full_text)
+        if isinstance(report, dict):
+            report = LawyerPrepReport(**report)
 
     # Format into markdown dossier
     lines = [

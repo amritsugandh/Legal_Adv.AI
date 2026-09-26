@@ -6,7 +6,7 @@ import {
   Send, Loader2, Calendar, Scale, Tag, ClipboardList,
   AlertTriangle, CheckCircle, Printer, Info, Sparkles,
   GitCompare, HelpCircle, Copy, Check, Download, RotateCcw, PenTool,
-  FileDown, Search
+  FileDown, Search, RefreshCw
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import {
@@ -68,9 +68,13 @@ export default function DocumentPage() {
     setActiveTab('explainer')
   }
 
-  if (loading) return <LoadingSpinner text="Loading document workspace…" />
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center" style={{ minHeight: '60vh' }}>
+      <LoadingSpinner text="Loading document workspace…" />
+    </div>
+  )
   if (!docInfo) return (
-    <div className="section-panel text-center py-24">
+    <div className="section-panel text-center" style={{ padding: '5rem 2rem' }}>
       <p className="mb-5" style={{ color: 'var(--th-text-muted)' }}>Document not found or removed.</p>
       <Link to="/" className="btn-primary">← Back to Dashboard</Link>
     </div>
@@ -289,7 +293,19 @@ function AnalysisTab({ docId, onExplain }) {
   }, [docId])
 
   if (loading) return <LoadingSpinner text="Executing deep legal analysis…" />
-  if (!data)   return <p style={{ color: 'var(--th-text-muted)' }}>Analysis unavailable.</p>
+  if (!data || (!data.risks && !data.obligations && !data.dates)) {
+    return (
+      <div className="section-panel text-center" style={{ padding: '4rem 2rem' }}>
+        <AlertTriangle className="w-10 h-10 mx-auto mb-4" style={{ color: 'var(--color-warning)', opacity: 0.6 }} />
+        <p className="text-base font-semibold mb-2" style={{ color: 'var(--th-text-primary)' }}>Analysis could not be loaded</p>
+        <p className="text-sm mb-5" style={{ color: 'var(--th-text-muted)' }}>The server returned an error. Please refresh the page to try again.</p>
+        <button onClick={() => { setData(null); setLoading(true); getFullAnalysis(docId).then(setData).catch(() => toast.error('Retry failed')).finally(() => setLoading(false)) }}
+          className="btn-primary flex items-center gap-2 mx-auto">
+          <RefreshCw className="w-4 h-4" /> Retry Analysis
+        </button>
+      </div>
+    )
+  }
 
   const sections = [
     { key:'risks',       label:'Potential Risks',        count: data.risks?.length||0,        icon: ShieldAlert,   color:'var(--color-danger)'        },

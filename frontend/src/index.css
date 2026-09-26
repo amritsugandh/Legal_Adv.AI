@@ -315,6 +315,181 @@ img, svg { display: block; }
   z-index: 50;
 }
 
+/* Inner row: logo ← spacer → right group */
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 64px;
+  padding-block: 0.6rem;
+}
+
+/* Logo */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.navbar-logo-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #6c5ce7, #00cec9);
+  border: 1px solid rgba(162, 155, 254, 0.3);
+  box-shadow: 0 0 16px rgba(108, 92, 231, 0.3);
+  transition: box-shadow 0.2s ease;
+}
+
+.navbar-logo:hover .navbar-logo-icon {
+  box-shadow: 0 0 24px rgba(108, 92, 231, 0.5);
+}
+
+.navbar-logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.navbar-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-logo-name {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--th-text-primary);
+  line-height: 1;
+}
+
+.navbar-logo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.45rem;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, rgba(108,92,231,0.14), rgba(0,206,201,0.08));
+  border: 1px solid rgba(108,92,231,0.22);
+  color: var(--color-aurora-purple);
+  white-space: nowrap;
+}
+
+.navbar-logo-sub {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--th-text-muted);
+  line-height: 1;
+  display: none;
+}
+
+@media (min-width: 480px) {
+  .navbar-logo-sub { display: block; }
+}
+
+/* Right group */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+/* Nav pills container */
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem;
+  border-radius: 10px;
+  background: var(--th-nav-pill-bg);
+  border: 1px solid var(--th-border-subtle);
+}
+
+/* Individual nav link */
+.navbar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--th-text-muted);
+  border: 1px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  line-height: 1;
+}
+
+.navbar-nav-link:hover {
+  color: var(--th-text-primary);
+  background: var(--th-btn-ghost-hover);
+}
+
+.navbar-nav-link--active {
+  background: linear-gradient(135deg, rgba(108,92,231,0.15), rgba(0,206,201,0.08));
+  border-color: rgba(108,92,231,0.28);
+  color: var(--th-text-primary);
+  box-shadow: 0 0 12px rgba(108,92,231,0.12);
+  font-weight: 700;
+}
+
+.navbar-nav-label {
+  display: none;
+}
+
+@media (min-width: 560px) {
+  .navbar-nav-label { display: inline; }
+}
+
+/* Engine status indicator */
+.navbar-status {
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 100px;
+  background: var(--th-nav-pill-bg);
+  border: 1px solid var(--th-border-subtle);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .navbar-status { display: flex; }
+}
+
+.navbar-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.navbar-status-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--th-text-muted);
+  letter-spacing: 0.02em;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    PAGE HEADER
    ═══════════════════════════════════════════════════════════════ */
@@ -980,4 +1155,126 @@ select.input option {
   .card, .section-panel { background: #fff !important; border: 1px solid #ccc !important; box-shadow: none !important; color: #000 !important; }
   .page-title { -webkit-text-fill-color: #000 !important; background: none !important; }
   .aurora-glow-top { display: none !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DOCUMENT PAGE — SPECIFIC OVERRIDES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Tab nav on document page: always scroll horizontally, never wrap */
+.tab-nav {
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Make tab items not shrink below their content */
+.tab-item {
+  flex-shrink: 0;
+}
+
+/* Analysis section panels need breathing room */
+.analysis-section-header {
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--th-border-subtle);
+  background: var(--th-panel-hdr);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+/* Toaster position fix — never overlap navbar */
+.react-hot-toast {
+  top: 80px !important;
+}
+
+/* ── Light theme: inputs need visible borders ── */
+[data-theme="light"] .input {
+  box-shadow: 0 1px 3px rgba(108,92,231,0.08), inset 0 1px 2px rgba(108,92,231,0.04);
+}
+
+[data-theme="light"] select.input {
+  background-image: none;
+}
+
+/* ── Light theme: cards need stronger shadows for depth ── */
+[data-theme="light"] .card {
+  box-shadow: 0 2px 16px rgba(108,92,231,0.09), 0 1px 3px rgba(108,92,231,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+[data-theme="light"] .section-panel {
+  box-shadow: 0 2px 16px rgba(108,92,231,0.08), 0 1px 3px rgba(108,92,231,0.05), inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+/* ── Light theme: stat cards ── */
+[data-theme="light"] .stat-card {
+  box-shadow: 0 2px 16px rgba(108,92,231,0.09), 0 1px 3px rgba(108,92,231,0.06);
+}
+
+/* ── Light theme: page header gradient ── */
+[data-theme="light"] .page-header {
+  box-shadow: 0 4px 24px rgba(108,92,231,0.1), 0 1px 0 rgba(255,255,255,0.7);
+}
+
+/* ── Light theme: navbar bottom border stronger ── */
+[data-theme="light"] .navbar-solid {
+  border-bottom-color: rgba(108,92,231,0.15);
+  box-shadow: 0 4px 24px rgba(108,92,231,0.1), 0 1px 0 rgba(255,255,255,0.8);
+}
+
+/* ── Light theme: panel header strip ── */
+[data-theme="light"] .panel-header-strip {
+  border-bottom-color: rgba(108,92,231,0.1);
+}
+
+/* ── Light theme: quote boxes ── */
+[data-theme="light"] .quote-box {
+  background: rgba(248,246,255,0.9);
+  border-left-color: rgba(108,92,231,0.4);
+}
+
+/* ── Light theme: chat AI bubble needs a visible border ── */
+[data-theme="light"] .chat-ai {
+  border-color: rgba(108,92,231,0.15);
+  box-shadow: 0 2px 12px rgba(108,92,231,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+/* ── Light theme: tab active item stronger ── */
+[data-theme="light"] .tab-item.active {
+  background: linear-gradient(135deg, rgba(108,92,231,0.12), rgba(0,206,201,0.07));
+  box-shadow: 0 2px 12px rgba(108,92,231,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+/* ── Light theme: footer ── */
+[data-theme="light"] .site-footer {
+  border-top-color: rgba(108,92,231,0.12);
+}
+
+/* ── Danger / warning info box light ── */
+[data-theme="light"] .badge-high   { background: rgba(220,50,50,0.08);  }
+[data-theme="light"] .badge-medium { background: rgba(180,120,0,0.08);  }
+[data-theme="light"] .badge-low    { background: rgba(0,150,120,0.08);  }
+[data-theme="light"] .badge-info   { background: rgba(26,95,180,0.08);  }
+
+/* ── Markdown in light theme: strong/code visible ── */
+[data-theme="light"] .markdown-body strong {
+  color: var(--th-text-primary);
+}
+
+[data-theme="light"] .markdown-body code {
+  background: rgba(108,92,231,0.06);
+  border-color: rgba(108,92,231,0.15);
+  color: #5b49d6;
+}
+
+/* ── Raw text viewer: proper font size ── */
+.raw-text-viewer {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+/* ── Section gap override for document tabs ── */
+.doc-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }

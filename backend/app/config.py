@@ -34,13 +34,17 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./legal_lens.db"
 
     # LLM Settings
-    LLM_MODEL: str = "gemini-2.0-flash"
+    LLM_MODEL: str = "gemini-1.5-flash"
     EMBEDDING_MODEL: str = "models/text-embedding-004"
 
-    # CORS
+    # CORS — include all common dev ports
     CORS_ORIGINS: list[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+        "http://localhost:5175",
+        "http://127.0.0.1:5175",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ]
@@ -49,6 +53,10 @@ class Settings(BaseSettings):
         env_file=_env_files,
         env_file_encoding="utf-8",
         extra="ignore",
+        # Allow CORS_ORIGINS to be supplied as a comma-separated string
+        # (e.g. from docker-compose or Render env vars) in addition to
+        # the default JSON-array format that pydantic-settings v2 expects.
+        env_list_separator=",",
     )
 
 
