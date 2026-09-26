@@ -28,8 +28,8 @@ services:
         source: /*
         destination: /index.html
     envVars:
-    - key: VITE_API_BASE_URL
-    fromService:
-    type: web
-    name: legallens-api
-    property: hostpath
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: legallens-api
+          property: hostpath
