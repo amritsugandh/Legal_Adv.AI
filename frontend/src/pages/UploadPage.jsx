@@ -8,43 +8,40 @@ import { uploadDocument } from '../services/documents'
 import toast from 'react-hot-toast'
 
 const DOCUMENT_TYPES = [
-  { value: '', label: 'Auto-detect contract category' },
+  { value: '',                    label: 'Auto-detect contract category' },
   { value: 'employment_contract', label: 'Employment Agreement' },
-  { value: 'rental_agreement', label: 'Rental / Lease Agreement' },
-  { value: 'loan_agreement', label: 'Loan & Financial Agreement' },
-  { value: 'nda', label: 'Non-Disclosure Agreement (NDA)' },
-  { value: 'service_agreement', label: 'Master Services Agreement (MSA)' },
-  { value: 'partnership_agreement', label: 'Partnership Agreement' },
-  { value: 'other', label: 'General / Custom Agreement' },
+  { value: 'rental_agreement',    label: 'Rental / Lease Agreement' },
+  { value: 'loan_agreement',      label: 'Loan & Financial Agreement' },
+  { value: 'nda',                 label: 'Non-Disclosure Agreement (NDA)' },
+  { value: 'service_agreement',   label: 'Master Services Agreement (MSA)' },
+  { value: 'partnership_agreement',label: 'Partnership Agreement' },
+  { value: 'other',               label: 'General / Custom Agreement' },
 ]
 
 export default function UploadPage() {
-  const navigate = useNavigate()
+  const navigate     = useNavigate()
   const fileInputRef = useRef(null)
 
-  const [file, setFile] = useState(null)
+  const [file, setFile]                 = useState(null)
   const [documentType, setDocumentType] = useState('')
-  const [uploading, setUploading] = useState(false)
-  const [dragActive, setDragActive] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [error, setError] = useState(null)
+  const [uploading, setUploading]       = useState(false)
+  const [dragActive, setDragActive]     = useState(false)
+  const [progress, setProgress]         = useState(0)
+  const [error, setError]               = useState(null)
 
   const accept = '.pdf,.docx'
 
   function validateFile(f) {
     const ext = f.name.split('.').pop()?.toLowerCase()
     if (!['pdf', 'docx'].includes(ext)) return 'Only PDF and DOCX files are supported.'
-    if (f.size > 50 * 1024 * 1024) return 'File must be under 50 MB.'
+    if (f.size > 50 * 1024 * 1024)      return 'File must be under 50 MB.'
     return null
   }
 
   const handleFile = useCallback((f) => {
     setError(null)
     const err = validateFile(f)
-    if (err) {
-      setError(err)
-      return
-    }
+    if (err) { setError(err); return }
     setFile(f)
   }, [])
 
@@ -55,18 +52,11 @@ export default function UploadPage() {
     if (dropped) handleFile(dropped)
   }
 
-  function handleDragOver(e) {
-    e.preventDefault()
-    setDragActive(true)
-  }
-
-  function handleDragLeave() {
-    setDragActive(false)
-  }
-
+  function handleDragOver(e)  { e.preventDefault(); setDragActive(true) }
+  function handleDragLeave()  { setDragActive(false) }
   function handleInputChange(e) {
-    const selected = e.target.files?.[0]
-    if (selected) handleFile(selected)
+    const f = e.target.files?.[0]
+    if (f) handleFile(f)
   }
 
   async function handleUpload() {
@@ -96,44 +86,55 @@ export default function UploadPage() {
   }
 
   function formatSize(bytes) {
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    if (bytes < 1024)            return `${bytes} B`
+    if (bytes < 1024 * 1024)     return `${(bytes / 1024).toFixed(1)} KB`
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
   return (
     <div className="page-stack max-w-3xl mx-auto">
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="page-header">
+
+      {/* ── Header ── */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="page-header"
+      >
         <div className="page-title-block">
           <div className="icon-box">
             <Upload className="w-5 h-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="page-kicker">Document Intake Pipeline</p>
             <h1 className="page-title">Upload Legal Document</h1>
             <p className="page-description">
-              Upload contracts in PDF or DOCX format for full AI vectorization, clause extraction, and risk assessment.
+              Upload contracts in PDF or DOCX format for full AI vectorization, clause
+              extraction, and risk assessment.
             </p>
           </div>
         </div>
       </motion.div>
 
-      {/* Main Intake Form */}
+      {/* ── Main Form ── */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         className="section-panel space-y-7"
       >
-        {/* Dropzone */}
+
+        {/* Step 1 – file selection */}
         <div>
-          <label className="block text-xs font-mono font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+          <label
+            className="block text-xs font-mono font-bold uppercase tracking-wider mb-3"
+            style={{ color: 'var(--th-text-muted)' }}
+          >
             1. Select Document File
           </label>
+
           <div
-            className={`dropzone ${dragActive ? 'active' : ''} ${file ? 'border-[var(--color-aurora-purple)]' : ''}`}
-            style={file ? { background: 'rgba(108, 92, 231, 0.03)' } : {}}
+            className={`dropzone ${dragActive ? 'active' : ''}`}
+            style={file ? { borderColor: 'var(--color-aurora-purple)', background: 'rgba(108,92,231,0.04)' } : {}}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -159,26 +160,38 @@ export default function UploadPage() {
                   <div
                     className="w-14 h-14 rounded-xl flex items-center justify-center"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(108, 92, 231, 0.15), rgba(0, 206, 201, 0.1))',
-                      border: '1px solid rgba(108, 92, 231, 0.25)',
+                      background: 'linear-gradient(135deg, rgba(108,92,231,0.15), rgba(0,206,201,0.1))',
+                      border: '1px solid rgba(108,92,231,0.25)',
                       color: 'var(--color-aurora-purple)',
-                      boxShadow: '0 0 20px rgba(108, 92, 231, 0.1)',
+                      boxShadow: '0 0 20px rgba(108,92,231,0.1)',
                     }}
                   >
                     <FileText className="w-7 h-7" />
                   </div>
                   <div className="text-center max-w-full">
-                    <p className="font-bold text-sm text-[var(--color-text-primary)] truncate max-w-md">
+                    <p
+                      className="font-bold text-sm truncate max-w-md"
+                      style={{ color: 'var(--th-text-primary)' }}
+                    >
                       {file.name}
                     </p>
-                    <p className="text-xs font-mono text-[var(--color-text-muted)] mt-1">
+                    <p
+                      className="text-xs font-mono mt-1"
+                      style={{ color: 'var(--th-text-muted)' }}
+                    >
                       {formatSize(file.size)} &bull; {file.name.split('.').pop()?.toUpperCase()}
                     </p>
                   </div>
                   {!uploading && (
                     <button
-                      onClick={(e) => { e.stopPropagation(); setFile(null); setProgress(0); setError(null) }}
-                      className="btn-ghost text-xs text-[var(--color-danger)] hover:bg-[rgba(255,118,117,0.08)] px-4 py-2 mt-1"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setFile(null)
+                        setProgress(0)
+                        setError(null)
+                      }}
+                      className="btn-ghost text-xs px-4 py-2 mt-1"
+                      style={{ color: 'var(--color-danger)' }}
                     >
                       <X className="w-3.5 h-3.5" />
                       Remove & Choose Another
@@ -196,35 +209,42 @@ export default function UploadPage() {
                   <div
                     className="w-14 h-14 rounded-xl flex items-center justify-center"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(0, 206, 201, 0.06))',
-                      border: '1px solid rgba(100, 120, 200, 0.15)',
+                      background: 'var(--th-icon-box-bg)',
+                      border: '1px solid var(--th-icon-box-bd)',
                       color: 'var(--color-aurora-purple)',
                     }}
                   >
                     <Upload className="w-7 h-7" />
                   </div>
                   <div className="text-center">
-                    <p className="font-bold text-sm text-[var(--color-text-primary)]">
-                      Drag and drop legal document file here
+                    <p
+                      className="font-bold text-sm"
+                      style={{ color: 'var(--th-text-primary)' }}
+                    >
+                      Drag and drop legal document here
                     </p>
-                    <p className="text-xs text-[var(--color-text-muted)] mt-1.5">
+                    <p
+                      className="text-xs mt-1.5"
+                      style={{ color: 'var(--th-text-muted)' }}
+                    >
                       or click to browse local storage
                     </p>
-                    <div className="flex items-center justify-center gap-2.5 mt-4 text-[11px] font-mono text-[var(--color-text-muted)]">
-                      <span
-                        className="px-2.5 py-1 rounded-md"
-                        style={{
-                          background: 'rgba(108, 92, 231, 0.08)',
-                          border: '1px solid rgba(108, 92, 231, 0.15)',
-                        }}
-                      >PDF</span>
-                      <span
-                        className="px-2.5 py-1 rounded-md"
-                        style={{
-                          background: 'rgba(108, 92, 231, 0.08)',
-                          border: '1px solid rgba(108, 92, 231, 0.15)',
-                        }}
-                      >DOCX</span>
+                    <div
+                      className="flex items-center justify-center gap-2.5 mt-4 text-[11px] font-mono"
+                      style={{ color: 'var(--th-text-muted)' }}
+                    >
+                      {['PDF', 'DOCX'].map((fmt) => (
+                        <span
+                          key={fmt}
+                          className="px-2.5 py-1 rounded-md"
+                          style={{
+                            background: 'rgba(108,92,231,0.08)',
+                            border: '1px solid rgba(108,92,231,0.15)',
+                          }}
+                        >
+                          {fmt}
+                        </span>
+                      ))}
                       <span>Up to 50 MB</span>
                     </div>
                   </div>
@@ -234,9 +254,12 @@ export default function UploadPage() {
           </div>
         </div>
 
-        {/* Contract Type Selection */}
+        {/* Step 2 – contract type */}
         <div>
-          <label className="block text-xs font-mono font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+          <label
+            className="block text-xs font-mono font-bold uppercase tracking-wider mb-3"
+            style={{ color: 'var(--th-text-muted)' }}
+          >
             2. Contract Classification (Optional)
           </label>
           <div className="relative">
@@ -249,34 +272,50 @@ export default function UploadPage() {
                 <option key={t.value} value={t.value}>{t.label}</option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
+            <ChevronDown
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+              style={{ color: 'var(--th-text-muted)' }}
+            />
           </div>
-          <p className="text-xs text-[var(--color-text-muted)] mt-2">
+          <p className="text-xs mt-2" style={{ color: 'var(--th-text-muted)' }}>
             If unselected, the engine will automatically determine document taxonomy during analysis.
           </p>
         </div>
 
-        {/* Upload & Ingestion Progress */}
+        {/* Progress bar */}
         {uploading && (
           <div
             className="p-5 rounded-xl space-y-3"
             style={{
-              background: 'rgba(10, 12, 26, 0.7)',
-              border: '1px solid rgba(108, 92, 231, 0.2)',
+              background: 'var(--th-overlay-dark)',
+              border: '1px solid rgba(108,92,231,0.2)',
             }}
           >
             <div className="flex items-center justify-between text-xs">
-              <span className="text-[var(--color-text-secondary)] font-mono flex items-center gap-2.5">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--color-aurora-purple)]" />
-                {progress < 100 ? 'Extracting text and generating legal embeddings...' : 'Ingestion complete. Directing...'}
+              <span
+                className="font-mono flex items-center gap-2.5"
+                style={{ color: 'var(--th-text-secondary)' }}
+              >
+                <Loader2
+                  className="w-3.5 h-3.5 animate-spin"
+                  style={{ color: 'var(--color-aurora-purple)' }}
+                />
+                {progress < 100
+                  ? 'Extracting text and generating legal embeddings...'
+                  : 'Ingestion complete. Redirecting...'}
               </span>
-              <span className="font-mono font-bold text-[var(--color-aurora-purple)]">{Math.round(progress)}%</span>
+              <span
+                className="font-mono font-bold"
+                style={{ color: 'var(--color-aurora-purple)' }}
+              >
+                {Math.round(progress)}%
+              </span>
             </div>
             <div
               className="w-full h-2.5 rounded-full overflow-hidden"
               style={{
-                background: 'rgba(14, 18, 37, 0.8)',
-                border: '1px solid rgba(100, 120, 200, 0.12)',
+                background: 'var(--th-bg-surface)',
+                border: '1px solid var(--th-border-subtle)',
               }}
             >
               <div
@@ -284,20 +323,20 @@ export default function UploadPage() {
                 style={{
                   width: `${progress}%`,
                   background: 'linear-gradient(90deg, var(--color-aurora-violet), var(--color-aurora-teal))',
-                  boxShadow: '0 0 12px rgba(108, 92, 231, 0.4)',
+                  boxShadow: '0 0 12px rgba(108,92,231,0.4)',
                 }}
               />
             </div>
           </div>
         )}
 
-        {/* Error notification */}
+        {/* Error */}
         {error && (
           <div
             className="flex items-start gap-3 rounded-xl p-4 text-xs"
             style={{
-              border: '1px solid rgba(255, 118, 117, 0.25)',
-              background: 'rgba(255, 118, 117, 0.06)',
+              border: '1px solid rgba(255,118,117,0.25)',
+              background: 'rgba(255,118,117,0.06)',
               color: 'var(--color-danger)',
             }}
           >
@@ -309,7 +348,7 @@ export default function UploadPage() {
           </div>
         )}
 
-        {/* Submit Button */}
+        {/* Submit */}
         <button
           onClick={handleUpload}
           disabled={!file || uploading}
@@ -324,12 +363,12 @@ export default function UploadPage() {
           ) : progress === 100 ? (
             <>
               <CheckCircle className="w-4 h-4" />
-              Analysis Ready &mdash; Opening Workspace...
+              Analysis Ready — Opening Workspace...
             </>
           ) : (
             <>
               <Upload className="w-4 h-4" />
-              Ingest & Analyze Document
+              Ingest &amp; Analyze Document
             </>
           )}
         </button>

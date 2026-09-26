@@ -12,13 +12,13 @@ import LoadingSpinner from '../components/ui/LoadingSpinner'
 import toast from 'react-hot-toast'
 
 const docTypeLabels = {
-  employment_contract: 'Employment',
-  rental_agreement: 'Rental / Lease',
-  loan_agreement: 'Loan & Finance',
-  nda: 'Non-Disclosure (NDA)',
-  service_agreement: 'Master Service',
-  partnership_agreement: 'Partnership',
-  other: 'General Agreement',
+  employment_contract:  'Employment',
+  rental_agreement:     'Rental / Lease',
+  loan_agreement:       'Loan & Finance',
+  nda:                  'Non-Disclosure (NDA)',
+  service_agreement:    'Master Service',
+  partnership_agreement:'Partnership',
+  other:                'General Agreement',
 }
 
 function formatDate(iso) {
@@ -32,19 +32,16 @@ function formatDate(iso) {
 
 export default function DashboardPage() {
   const [documents, setDocuments] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [deleting, setDeleting] = useState(null)
+  const [loading, setLoading]     = useState(true)
+  const [search, setSearch]       = useState('')
+  const [deleting, setDeleting]   = useState(null)
 
-  useEffect(() => {
-    fetchDocuments()
-  }, [])
+  useEffect(() => { fetchDocuments() }, [])
 
   async function fetchDocuments() {
     try {
       setLoading(true)
-      const docs = await listDocuments()
-      setDocuments(docs)
+      setDocuments(await listDocuments())
     } catch (err) {
       toast.error(err.message || 'Failed to load documents')
     } finally {
@@ -54,9 +51,7 @@ export default function DashboardPage() {
 
   async function handleDelete(id, filename) {
     if (deleting) return
-    const confirmed = window.confirm(`Delete "${filename}"? This cannot be undone.`)
-    if (!confirmed) return
-
+    if (!window.confirm(`Delete "${filename}"? This cannot be undone.`)) return
     setDeleting(id)
     try {
       await deleteDocument(id)
@@ -69,20 +64,20 @@ export default function DashboardPage() {
     }
   }
 
-  const analyzedCount = documents.filter((doc) => doc.status === 'ready').length
-  const totalPages = documents.reduce((sum, doc) => sum + (Number(doc.page_count) || 0), 0)
-  const query = search.trim().toLowerCase()
-  const filtered = documents.filter((doc) => {
-    const filename = (doc.filename || '').toLowerCase()
-    const type = (doc.document_type || '').toLowerCase()
-    return filename.includes(query) || type.includes(query)
-  })
+  const analyzedCount = documents.filter((d) => d.status === 'ready').length
+  const totalPages    = documents.reduce((s, d) => s + (Number(d.page_count) || 0), 0)
+  const query         = search.trim().toLowerCase()
+  const filtered      = documents.filter((d) =>
+    (d.filename || '').toLowerCase().includes(query) ||
+    (d.document_type || '').toLowerCase().includes(query)
+  )
 
   if (loading) return <LoadingSpinner text="Loading documents repository..." />
 
   return (
     <div className="page-stack">
-      {/* Header */}
+
+      {/* ── Page Header ── */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -92,15 +87,16 @@ export default function DashboardPage() {
           <div className="icon-box">
             <ShieldCheck className="w-5 h-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="page-kicker">Intelligence Workspace</p>
             <h1 className="page-title">Executive Dashboard</h1>
             <p className="page-description">
-              Manage uploaded legal agreements, extract critical clauses, evaluate risk profiles, and cross-compare contracts.
+              Manage uploaded legal agreements, extract critical clauses, evaluate risk profiles,
+              and cross-compare contracts.
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-shrink-0 flex-wrap">
           <Link to="/upload" className="btn-primary">
             <Upload className="w-4 h-4" />
             Upload Document
@@ -112,7 +108,7 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
-      {/* KPI Stats Grid */}
+      {/* ── KPI Stats ── */}
       <div className="stats-grid">
         <div className="stat-card">
           <span className="stat-label">Indexed Documents</span>
@@ -122,41 +118,56 @@ export default function DashboardPage() {
           <span className="stat-label">AI Analyzed</span>
           <span className="stat-value">
             {analyzedCount}
-            <FileCheck2 className="w-5 h-5 text-[var(--color-aurora-green)] ml-1" />
+            <FileCheck2
+              className="w-5 h-5 ml-1"
+              style={{ color: 'var(--color-aurora-green)' }}
+            />
           </span>
         </div>
         <div className="stat-card stat-card-gold">
-          <span className="stat-label">Total Clauses & Pages</span>
+          <span className="stat-label">Total Pages</span>
           <span className="stat-value">
             {totalPages}
-            <span className="text-sm font-mono font-medium text-[var(--color-text-muted)]">PAGES</span>
+            <span
+              className="text-sm font-mono font-medium"
+              style={{ color: 'var(--th-text-muted)' }}
+            >
+              PGS
+            </span>
           </span>
         </div>
       </div>
 
-      {/* Search and Filter Strip */}
+      {/* ── Search & Filter Strip ── */}
       {documents.length > 0 && (
-        <div className="section-panel py-3.5 px-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="section-panel py-3.5 px-5 flex flex-col sm:flex-row items-center gap-4">
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]" />
+            <Search
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4"
+              style={{ color: 'var(--th-text-muted)' }}
+            />
             <input
               type="text"
-              placeholder="Filter by document title, agreement type, or keywords..."
+              placeholder="Filter by title, agreement type, or keywords..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="input pl-10 h-10"
             />
           </div>
-          <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)] whitespace-nowrap">
+          <div
+            className="flex items-center gap-3 text-xs whitespace-nowrap flex-shrink-0"
+            style={{ color: 'var(--th-text-muted)' }}
+          >
             <span>
               Showing{' '}
-              <strong className="text-[var(--color-text-primary)]">{filtered.length}</strong>{' '}
-              of {documents.length} agreements
+              <strong style={{ color: 'var(--th-text-primary)' }}>{filtered.length}</strong>
+              {' '}of {documents.length}
             </span>
             {search && (
               <button
                 onClick={() => setSearch('')}
-                className="text-[var(--color-aurora-purple)] hover:underline font-bold"
+                className="font-bold hover:underline"
+                style={{ color: 'var(--color-aurora-purple)' }}
               >
                 Clear
               </button>
@@ -165,7 +176,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Document Grid / Empty States */}
+      {/* ── Document Grid / Empty States ── */}
       {filtered.length === 0 && documents.length === 0 ? (
         <EmptyState
           icon={FileText}
@@ -183,7 +194,7 @@ export default function DashboardPage() {
         <EmptyState
           icon={Search}
           title="No matching agreements found"
-          description={`No documents match your query "${search}".`}
+          description={`No documents match "${search}".`}
         >
           <button onClick={() => setSearch('')} className="btn-secondary mt-4">
             Reset Filter
@@ -199,43 +210,48 @@ export default function DashboardPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ delay: idx * 0.04 }}
-                className="card card-interactive flex flex-col justify-between"
+                className="card card-interactive flex flex-col"
               >
-                {/* Top strip */}
+                {/* Card top strip */}
                 <div
                   className="p-4 flex items-start justify-between gap-3"
                   style={{
-                    borderBottom: '1px solid rgba(100, 120, 200, 0.12)',
-                    background: 'linear-gradient(135deg, rgba(10, 12, 26, 0.7), rgba(14, 18, 37, 0.6))',
+                    borderBottom: '1px solid var(--th-border-subtle)',
+                    background: 'var(--th-overlay-mild)',
+                    borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
                   }}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{
-                        background: 'linear-gradient(135deg, rgba(108, 92, 231, 0.12), rgba(0, 206, 201, 0.08))',
-                        border: '1px solid rgba(108, 92, 231, 0.2)',
+                        background: 'var(--th-icon-box-bg)',
+                        border: '1px solid var(--th-icon-box-bd)',
                         color: 'var(--color-aurora-purple)',
                       }}
                     >
                       <FileText className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-bold text-sm text-[var(--color-text-primary)] truncate" title={doc.filename}>
+                      <h3
+                        className="font-bold text-sm truncate"
+                        style={{ color: 'var(--th-text-primary)' }}
+                        title={doc.filename}
+                      >
                         {doc.filename}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <span
                           className="font-mono text-[10px] uppercase font-bold px-2 py-0.5 rounded"
                           style={{
-                            background: 'rgba(108, 92, 231, 0.1)',
-                            border: '1px solid rgba(108, 92, 231, 0.15)',
+                            background: 'rgba(108,92,231,0.1)',
+                            border: '1px solid rgba(108,92,231,0.15)',
                             color: 'var(--color-aurora-purple)',
                           }}
                         >
                           {doc.file_type || 'PDF'}
                         </span>
-                        <span className="text-xs text-[var(--color-text-muted)]">
+                        <span className="text-xs" style={{ color: 'var(--th-text-muted)' }}>
                           {docTypeLabels[doc.document_type] || doc.document_type || 'Contract'}
                         </span>
                       </div>
@@ -245,65 +261,89 @@ export default function DashboardPage() {
                   <button
                     onClick={(e) => { e.preventDefault(); handleDelete(doc.id, doc.filename) }}
                     disabled={deleting === doc.id}
-                    className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors rounded-lg hover:bg-[rgba(255,118,117,0.08)]"
-                    title="Delete document"
+                    className="p-2 rounded-lg transition-colors flex-shrink-0"
+                    style={{ color: 'var(--th-text-muted)' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = 'var(--color-danger)'
+                      e.currentTarget.style.background = 'rgba(255,118,117,0.08)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'var(--th-text-muted)'
+                      e.currentTarget.style.background = 'transparent'
+                    }}
+                    title={`Delete ${doc.filename}`}
                     aria-label={`Delete ${doc.filename}`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
 
-                {/* Details body */}
-                <div className="p-4 space-y-3 text-xs text-[var(--color-text-secondary)]">
+                {/* Card body */}
+                <div
+                  className="p-4 space-y-3 text-xs flex-1"
+                  style={{ color: 'var(--th-text-secondary)' }}
+                >
                   <div
                     className="flex items-center justify-between py-1.5"
-                    style={{ borderBottom: '1px solid rgba(100, 120, 200, 0.08)' }}
+                    style={{ borderBottom: '1px solid var(--th-border-subtle)' }}
                   >
-                    <span className="text-[var(--color-text-muted)] flex items-center gap-2">
+                    <span
+                      className="flex items-center gap-2"
+                      style={{ color: 'var(--th-text-muted)' }}
+                    >
                       <Layers className="w-3.5 h-3.5" /> Length
                     </span>
-                    <span className="font-mono font-semibold text-[var(--color-text-primary)]">
+                    <span
+                      className="font-mono font-semibold"
+                      style={{ color: 'var(--th-text-primary)' }}
+                    >
                       {doc.page_count} page{doc.page_count !== 1 ? 's' : ''}
                     </span>
                   </div>
                   <div
                     className="flex items-center justify-between py-1.5"
-                    style={{ borderBottom: '1px solid rgba(100, 120, 200, 0.08)' }}
+                    style={{ borderBottom: '1px solid var(--th-border-subtle)' }}
                   >
-                    <span className="text-[var(--color-text-muted)] flex items-center gap-2">
+                    <span
+                      className="flex items-center gap-2"
+                      style={{ color: 'var(--th-text-muted)' }}
+                    >
                       <Clock className="w-3.5 h-3.5" /> Ingested
                     </span>
-                    <span className="text-[var(--color-text-muted)]">
+                    <span style={{ color: 'var(--th-text-muted)' }}>
                       {formatDate(doc.uploaded_at)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between pt-1">
-                    <span className="text-[var(--color-text-muted)]">Status</span>
+                    <span style={{ color: 'var(--th-text-muted)' }}>Status</span>
                     <span className={`badge ${doc.status === 'ready' ? 'badge-low' : 'badge-info'}`}>
-                      {doc.status === 'ready' ? 'Fully Analyzed' : doc.status}
+                      {doc.status === 'ready' ? 'Analyzed' : doc.status}
                     </span>
                   </div>
                 </div>
 
-                {/* Card Action Footer */}
+                {/* Card footer actions */}
                 <div
                   className="p-3.5 flex items-center justify-between gap-3"
                   style={{
-                    borderTop: '1px solid rgba(100, 120, 200, 0.12)',
-                    background: 'linear-gradient(135deg, rgba(10, 12, 26, 0.5), rgba(14, 18, 37, 0.4))',
+                    borderTop: '1px solid var(--th-border-subtle)',
+                    background: 'var(--th-overlay-faint)',
+                    borderRadius: '0 0 var(--radius-md) var(--radius-md)',
                   }}
                 >
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1">
                     <Link
                       to={`/documents/${doc.id}?tab=chat`}
-                      className="btn-ghost p-2 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+                      className="btn-ghost p-2 text-xs"
+                      style={{ color: 'var(--th-text-muted)' }}
                       title="Q&A Chat"
                     >
                       <MessageSquare className="w-3.5 h-3.5" />
                     </Link>
                     <Link
                       to="/compare"
-                      className="btn-ghost p-2 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+                      className="btn-ghost p-2 text-xs"
+                      style={{ color: 'var(--th-text-muted)' }}
                       title="Compare against another"
                     >
                       <GitCompare className="w-3.5 h-3.5" />
