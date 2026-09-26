@@ -3,53 +3,46 @@
 #
 # IMPORTANT: After first deploy, add a Persistent Disk to the service
 # and mount it at /app/data to prevent SQLite/uploads being wiped on restart.
-# Alternatively, swap DATABASE_URL to a Render PostgreSQL instance.
 #
 # Required secret env vars (set in Render dashboard, not here):
-#   GOOGLE_API_KEY       — Gemini API key from https://aistudio.google.com/app/apikey
-#   CORS_ORIGINS         — JSON array of allowed frontend origin(s), e.g.:
-#                          ["https://your-app.vercel.app","https://your-custom-domain.com"]
+#   GOOGLE_API_KEY  — from https://aistudio.google.com/app/apikey
+#   CORS_ORIGINS    — e.g. ["https://your-app.vercel.app"]
 
 services:
   - type: web
     name: legallens-api
     runtime: python
-    rootDir: backend
     plan: free
     region: oregon
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    buildCommand: "pip install --upgrade pip && pip install -r backend/requirements.txt"
+    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
-      # Application
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+
       - key: DEBUG
         value: "false"
+
       - key: APP_NAME
         value: "LegalLens"
 
-      # LLM / Embedding
       - key: LLM_MODEL
         value: "gemini-2.0-flash"
+
       - key: EMBEDDING_MODEL
         value: "models/text-embedding-004"
 
-      # Storage paths — keep these inside /app so they land on the persistent disk
       - key: UPLOAD_DIR
-        value: "/app/uploads"
+        value: "/opt/render/project/src/backend/uploads"
+
       - key: CHROMA_PERSIST_DIR
-        value: "/app/chroma_db"
+        value: "/opt/render/project/src/backend/chroma_db"
 
-      # Database — SQLite on Render's ephemeral FS is wiped on every deploy.
-      # Mount a Persistent Disk at /app/data or replace with a PostgreSQL URL.
       - key: DATABASE_URL
-        value: "sqlite+aiosqlite:////app/data/legal_lens.db"
+        value: "sqlite+aiosqlite:////opt/render/project/src/backend/legal_lens.db"
 
-      # CORS — set to your actual Vercel frontend URL(s).
-      # Using "*" with allow_credentials=True violates the CORS spec and will
-      # break credentialed requests in browsers. Always list explicit origins.
-      # This value is overridden from the Render dashboard (sync: false).
       - key: CORS_ORIGINS
-        sync: false   # Set in dashboard: ["https://your-app.vercel.app"]
+        sync: false
 
-      # Secrets — set in dashboard, never committed to source
       - key: GOOGLE_API_KEY
         sync: false
