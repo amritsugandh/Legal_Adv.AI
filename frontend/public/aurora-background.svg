@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1400" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#050712"/>
+      <stop offset="0.45" stop-color="#080b18"/>
+      <stop offset="1" stop-color="#05050d"/>
+    </linearGradient>
+    <radialGradient id="violet-glow" cx="24%" cy="7%" r="54%">
+      <stop offset="0" stop-color="#8d7cff" stop-opacity="0.34"/>
+      <stop offset="0.38" stop-color="#6c5ce7" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#6c5ce7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="teal-glow" cx="83%" cy="15%" r="52%">
+      <stop offset="0" stop-color="#55efc4" stop-opacity="0.28"/>
+      <stop offset="0.42" stop-color="#00cec9" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#00cec9" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rose-glow" cx="62%" cy="1%" r="42%">
+      <stop offset="0" stop-color="#fd79a8" stop-opacity="0.16"/>
+      <stop offset="0.46" stop-color="#fd79a8" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#fd79a8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft-blur" x="-20%" y="-80%" width="140%" height="260%">
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+    <filter id="wide-blur" x="-30%" y="-120%" width="160%" height="340%">
+      <feGaussianBlur stdDeviation="48"/>
+    </filter>
+    <linearGradient id="aurora-a" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6c5ce7" stop-opacity="0"/>
+      <stop offset="0.2" stop-color="#a29bfe" stop-opacity="0.34"/>
+      <stop offset="0.48" stop-color="#55efc4" stop-opacity="0.42"/>
+      <stop offset="0.75" stop-color="#74b9ff" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#00cec9" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="aurora-b" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00cec9" stop-opacity="0"/>
+      <stop offset="0.24" stop-color="#55efc4" stop-opacity="0.24"/>
+      <stop offset="0.56" stop-color="#6c5ce7" stop-opacity="0.26"/>
+      <stop offset="0.86" stop-color="#fd79a8" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#fd79a8" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="2400" height="1400" fill="url(#sky)"/>
+  <rect width="2400" height="1400" fill="url(#violet-glow)"/>
+  <rect width="2400" height="1400" fill="url(#teal-glow)"/>
+  <rect width="2400" height="1400" fill="url(#rose-glow)"/>
+
+  <g filter="url(#wide-blur)" opacity="0.95">
+    <path d="M-120 285 C 250 180, 520 350, 830 248 S 1390 130, 1745 255 S 2200 330, 2520 170 L2520 365 C2145 465, 1860 365, 1540 310 S 980 380, 665 330 S 160 340, -120 430 Z" fill="url(#aurora-a)"/>
+    <path d="M-140 135 C 250 90, 480 210, 835 160 S 1375 35, 1770 150 S 2180 250, 2540 85 L2540 260 C2210 365, 1885 238, 1565 220 S 1030 290, 700 245 S 250 210, -140 320 Z" fill="url(#aurora-b)"/>
+  </g>
+
+  <g filter="url(#soft-blur)" opacity="0.7">
+    <path d="M260 400 C 560 250, 785 435, 1085 315 S 1635 230, 2030 390" fill="none" stroke="#55efc4" stroke-width="74" stroke-linecap="round" opacity="0.16"/>
+    <path d="M-40 510 C 330 355, 595 485, 935 405 S 1510 285, 1880 430 S 2260 540, 2460 410" fill="none" stroke="#a29bfe" stroke-width="92" stroke-linecap="round" opacity="0.14"/>
+    <path d="M440 210 C 750 120, 1010 225, 1310 165 S 1810 125, 2080 230" fill="none" stroke="#74b9ff" stroke-width="54" stroke-linecap="round" opacity="0.11"/>
+  </g>
+
+  <rect width="2400" height="1400" fill="#05060d" opacity="0.34"/>
+  <rect width="2400" height="1400" fill="none" stroke="#ffffff" stroke-opacity="0.03" stroke-width="2"/>
+</svg>

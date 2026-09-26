@@ -1,0 +1,62 @@
+"""
+LegalLens — Application Configuration
+Loads settings from environment variables / .env file.
+"""
+
+import os
+from pathlib import Path
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_backend_dir = Path(__file__).resolve().parent.parent
+_env_files = [str(_backend_dir / ".env"), ".env"]
+
+
+class Settings(BaseSettings):
+    """Application settings loaded from environment variables."""
+
+    # Application
+    APP_NAME: str = "LegalLens"
+    DEBUG: bool = True
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
+
+    # Google Gemini API
+    GOOGLE_API_KEY: str = ""
+
+    # File Storage
+    UPLOAD_DIR: str = "./uploads"
+    MAX_FILE_SIZE_MB: int = 50
+
+    # ChromaDB
+    CHROMA_PERSIST_DIR: str = "./chroma_db"
+
+    # Database
+    DATABASE_URL: str = "sqlite+aiosqlite:///./legal_lens.db"
+
+    # LLM Settings
+    LLM_MODEL: str = "gemini-2.0-flash"
+    EMBEDDING_MODEL: str = "models/text-embedding-004"
+
+    # CORS
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
+    model_config = SettingsConfigDict(
+        env_file=_env_files,
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+
+# Singleton settings instance
+settings = Settings()
+
+
+def ensure_directories():
+    """Create required directories if they don't exist."""
+    Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+    Path(settings.CHROMA_PERSIST_DIR).mkdir(parents=True, exist_ok=True)

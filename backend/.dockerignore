@@ -1,0 +1,15 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+tests
+.env
+uploads/*
+!uploads/.gitkeep
+chroma_db/*
+!chroma_db/.gitkeep
+legal_lens.db
+*.db-journal
+.DS_Store

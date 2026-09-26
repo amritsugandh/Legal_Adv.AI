@@ -1,0 +1,40 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: legallens_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=true
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-models/embedding-001}
+      - CORS_ORIGINS=http://localhost,http://localhost:80,http://localhost:5173,http://localhost:3000
+      - DATABASE_URL=sqlite+aiosqlite:////app/data/legal_lens.db
+      - UPLOAD_DIR=/app/uploads
+      - CHROMA_PERSIST_DIR=/app/chroma_db
+    volumes:
+      - backend_data:/app/data
+      - backend_uploads:/app/uploads
+      - backend_chroma:/app/chroma_db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: legallens_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  backend_data:
+  backend_uploads:
+  backend_chroma:

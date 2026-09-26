@@ -1,0 +1,50 @@
+# ==========================================
+# LegalLens Git Ignore Rules
+# ==========================================
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Python & Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node & Frontend
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+dist-ssr/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+
+# Local Persistent Data & Databases
+backend/legal_lens.db
+backend/*.db
+backend/*.db-journal
+backend/chroma_db/
+backend/uploads/*
+!backend/uploads/.gitkeep
+*.db
+
+# Operating System & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
