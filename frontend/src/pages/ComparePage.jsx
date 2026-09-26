@@ -100,26 +100,44 @@ export default function ComparePage() {
 
   return (
     <div className="page-stack">
-      {/* Header */}
-      <motion.div initial={{ opacity:0, y:-12 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.3 }} className="page-header">
+
+      {/* ── Page header ── */}
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="page-header"
+      >
         <div className="page-title-block">
-          <div className="icon-box flex-shrink-0"><GitCompare className="w-5 h-5" /></div>
+          <div className="icon-box flex-shrink-0">
+            <GitCompare className="w-5 h-5" />
+          </div>
           <div className="min-w-0">
             <p className="page-kicker">Cross-Document Auditing</p>
             <h1 className="page-title">Contract Comparison</h1>
-            <p className="page-description">Compare two agreements side-by-side to pinpoint changed covenants, altered notice windows, and shifted liabilities.</p>
+            <p className="page-description">
+              Compare two agreements side-by-side to pinpoint changed covenants, altered notice windows, and shifted liabilities.
+            </p>
           </div>
         </div>
       </motion.div>
 
-      {/* Mode tabs */}
+      {/* ── Mode tabs ── */}
       {!result && (
-        <div className="tab-nav w-fit">
-          <button className={`tab-item ${mode==='upload'?'active':''}`} onClick={()=>setMode('upload')}>
-            <Upload className="w-4 h-4" /> Upload 2 Files
+        <div className="compare-mode-tabs">
+          <button
+            className={`compare-mode-tab ${mode === 'upload' ? 'compare-mode-tab--active' : ''}`}
+            onClick={() => setMode('upload')}
+          >
+            <Upload className="w-4 h-4 flex-shrink-0" />
+            <span>Upload 2 Files</span>
           </button>
-          <button className={`tab-item ${mode==='existing'?'active':''}`} onClick={()=>setMode('existing')}>
-            <FileText className="w-4 h-4" /> From Repository
+          <button
+            className={`compare-mode-tab ${mode === 'existing' ? 'compare-mode-tab--active' : ''}`}
+            onClick={() => setMode('existing')}
+          >
+            <FileText className="w-4 h-4 flex-shrink-0" />
+            <span>From Repository</span>
           </button>
         </div>
       )}
@@ -152,51 +170,95 @@ function UploadCompare({ onResult, onLoading }) {
   }
 
   return (
-    <div className="section-panel space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <FilePickerCard label="Document A — Original / Baseline" file={fileA} onSelect={setFileA} onClear={()=>setFileA(null)} badge="Baseline" />
-        <FilePickerCard label="Document B — Revised / Counterparty" file={fileB} onSelect={setFileB} onClear={()=>setFileB(null)} badge="Target" />
+    <div className="compare-upload-panel">
+      {/* Two file pickers */}
+      <div className="compare-files-grid">
+        <FilePickerCard
+          label="Document A — Original / Baseline"
+          file={fileA}
+          onSelect={setFileA}
+          onClear={() => setFileA(null)}
+          badge="Baseline"
+          badgeClass="badge-info"
+          accentColor="var(--color-aurora-blue)"
+        />
+        <FilePickerCard
+          label="Document B — Revised / Counterparty"
+          file={fileB}
+          onSelect={setFileB}
+          onClear={() => setFileB(null)}
+          badge="Target"
+          badgeClass="badge-medium"
+          accentColor="var(--color-aurora-purple)"
+        />
       </div>
-      <div className="pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style={{ borderTop:'1px solid var(--th-border-subtle)' }}>
-        <p className="text-sm" style={{ color:'var(--th-text-muted)' }}>Both documents will be parsed and evaluated against standard legal covenants.</p>
-        <button onClick={go} disabled={!fileA||!fileB} className="btn-primary flex-shrink-0 flex items-center gap-2">
-          <GitCompare className="w-4 h-4" /> Run Comparative Audit
+
+      {/* Bottom action bar */}
+      <div className="compare-action-bar">
+        <p className="compare-hint-text">
+          Both documents will be parsed and evaluated against standard legal covenants.
+        </p>
+        <button
+          onClick={go}
+          disabled={!fileA || !fileB}
+          className="btn-primary flex items-center gap-2"
+          style={{ minHeight: '46px', padding: '0 1.5rem', fontSize: '0.9rem' }}
+        >
+          <GitCompare className="w-4 h-4" />
+          Run Comparative Audit
         </button>
       </div>
     </div>
   )
 }
 
-function FilePickerCard({ label, file, onSelect, onClear, badge }) {
+function FilePickerCard({ label, file, onSelect, onClear, badge, badgeClass, accentColor }) {
   return (
-    <div className="card p-5 space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-xs font-mono font-bold uppercase tracking-wider" style={{ color:'var(--th-text-primary)' }}>{label}</span>
-        <span className="badge badge-info flex-shrink-0">{badge}</span>
+    <div className="compare-file-card">
+      {/* Card header */}
+      <div className="compare-file-card-header">
+        <span className="compare-file-label">{label}</span>
+        <span className={`badge ${badgeClass || 'badge-info'} flex-shrink-0`}>{badge}</span>
       </div>
+
+      {/* File selected state */}
       {file ? (
-        <div className="p-4 rounded-xl flex items-center justify-between gap-3" style={{ background:'var(--th-overlay-dark)', border:'1px solid var(--th-border-default)' }}>
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:'var(--th-icon-box-bg)', border:'1px solid var(--th-icon-box-bd)', color:'var(--color-aurora-purple)' }}>
-              <FileText className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold truncate" style={{ color:'var(--th-text-primary)' }}>{file.name}</p>
-              <p className="text-xs font-mono mt-0.5" style={{ color:'var(--th-text-muted)' }}>{(file.size/1024).toFixed(1)} KB</p>
-            </div>
+        <div className="compare-file-selected">
+          <div
+            className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: 'var(--th-icon-box-bg)', border: '1px solid var(--th-icon-box-bd)', color: accentColor || 'var(--color-aurora-purple)' }}
+          >
+            <FileText className="w-5 h-5" />
           </div>
-          <button onClick={onClear} className="btn-ghost w-8 h-8 p-0 flex-shrink-0" style={{ minHeight:'unset', color:'var(--color-danger)' }}><X className="w-4 h-4" /></button>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold truncate" style={{ color: 'var(--th-text-primary)' }}>{file.name}</p>
+            <p className="text-xs font-mono mt-0.5" style={{ color: 'var(--th-text-muted)' }}>{(file.size / 1024).toFixed(1)} KB</p>
+          </div>
+          <button
+            onClick={onClear}
+            className="btn-ghost flex-shrink-0"
+            style={{ width: '34px', height: '34px', minHeight: 'unset', padding: 0, color: 'var(--color-danger)' }}
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       ) : (
-        <label className="dropzone block cursor-pointer" style={{ padding:'2rem 1.5rem' }}>
-          <input type="file" accept=".pdf,.docx" onChange={e => { const f=e.target.files?.[0]; if(f) onSelect(f) }} className="hidden" />
-          <div className="flex flex-col items-center gap-3 text-sm">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background:'var(--th-icon-box-bg)', border:'1px solid var(--th-icon-box-bd)', color:'var(--color-aurora-purple)' }}>
-              <Upload className="w-5 h-5" />
-            </div>
-            <span className="font-semibold" style={{ color:'var(--th-text-primary)' }}>Choose Agreement File</span>
-            <span className="font-mono text-xs" style={{ color:'var(--th-text-muted)' }}>PDF or DOCX</span>
+        /* Drop zone */
+        <label className="compare-dropzone">
+          <input
+            type="file"
+            accept=".pdf,.docx"
+            onChange={e => { const f = e.target.files?.[0]; if (f) onSelect(f) }}
+            className="hidden"
+          />
+          <div
+            className="compare-dropzone-icon"
+            style={{ color: accentColor || 'var(--color-aurora-purple)', borderColor: accentColor ? `${accentColor}44` : 'rgba(108,92,231,0.25)' }}
+          >
+            <Upload className="w-6 h-6" />
           </div>
+          <span className="compare-dropzone-title">Choose Agreement File</span>
+          <span className="compare-dropzone-sub">PDF or DOCX · Max 50 MB</span>
         </label>
       )}
     </div>
@@ -230,41 +292,60 @@ function ExistingCompare({ onResult, onLoading }) {
   if (loadingDocs) return <LoadingSpinner text="Loading documents…" />
 
   if (docs.length < 2) return (
-    <div className="section-panel text-center py-16 space-y-5">
-      <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style={{ background:'var(--th-icon-box-bg)', border:'1px solid var(--th-border-subtle)' }}>
-        <Info className="w-7 h-7" style={{ color:'var(--th-text-muted)', opacity:0.5 }} />
+    <div className="compare-upload-panel text-center" style={{ alignItems: 'center', gap: '1.5rem', padding: '4rem 2rem' }}>
+      <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'var(--th-icon-box-bg)', border: '1px solid var(--th-border-subtle)' }}>
+        <Info className="w-7 h-7" style={{ color: 'var(--th-text-muted)', opacity: 0.5 }} />
       </div>
       <div>
-        <h4 className="text-base font-bold mb-2" style={{ color:'var(--th-text-primary)' }}>At Least Two Documents Required</h4>
-        <p className="text-sm max-w-sm mx-auto" style={{ color:'var(--th-text-muted)' }}>
-          You have {docs.length} document{docs.length!==1?'s':''}. Upload another to enable comparison.
+        <h4 className="text-base font-bold mb-2" style={{ color: 'var(--th-text-primary)' }}>At Least Two Documents Required</h4>
+        <p className="text-sm max-w-sm" style={{ color: 'var(--th-text-muted)' }}>
+          You have {docs.length} document{docs.length !== 1 ? 's' : ''}. Upload another to enable comparison.
         </p>
       </div>
-      <Link to="/upload" className="btn-primary inline-flex items-center gap-2 text-sm"><PlusCircle className="w-4 h-4" /> Upload Second Agreement</Link>
+      <Link to="/upload" className="btn-primary inline-flex items-center gap-2 text-sm">
+        <PlusCircle className="w-4 h-4" /> Upload Second Agreement
+      </Link>
     </div>
   )
 
   return (
-    <div className="section-panel space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div className="compare-upload-panel">
+      <div className="compare-files-grid">
         {[
-          { id:docAId, setId:setDocAId, label:'Document A — Original Baseline', placeholder:'Select baseline…' },
-          { id:docBId, setId:setDocBId, label:'Document B — Comparison Target',  placeholder:'Select target…'   },
+          { id: docAId, setId: setDocAId, label: 'Document A — Original Baseline', placeholder: 'Select baseline document…' },
+          { id: docBId, setId: setDocBId, label: 'Document B — Comparison Target',  placeholder: 'Select target document…'   },
         ].map(({ id, setId, label, placeholder }) => (
-          <div key={label} className="card p-5 space-y-3">
-            <label className="block text-xs font-mono font-bold uppercase tracking-wider" style={{ color:'var(--th-text-primary)' }}>{label}</label>
+          <div key={label} className="compare-file-card">
+            <div className="compare-file-card-header">
+              <span className="compare-file-label">{label}</span>
+            </div>
             <div className="relative">
-              <select value={id} onChange={e=>setId(e.target.value)} className="input appearance-none pr-10 cursor-pointer text-sm">
+              <select
+                value={id}
+                onChange={e => setId(e.target.value)}
+                className="input appearance-none pr-10 cursor-pointer"
+                style={{ fontSize: '0.875rem', minHeight: '46px' }}
+              >
                 <option value="">{placeholder}</option>
                 {docs.map(d => <option key={d.id} value={d.id}>{d.filename}</option>)}
               </select>
-              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color:'var(--th-text-muted)' }} />
+              <ChevronDown
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                style={{ color: 'var(--th-text-muted)' }}
+              />
             </div>
           </div>
         ))}
       </div>
-      <div className="pt-4 flex items-center justify-end" style={{ borderTop:'1px solid var(--th-border-subtle)' }}>
-        <button onClick={go} disabled={!docAId||!docBId||docAId===docBId} className="btn-primary flex items-center gap-2">
+
+      <div className="compare-action-bar">
+        <p className="compare-hint-text">Select two documents from your repository to run a side-by-side clause comparison.</p>
+        <button
+          onClick={go}
+          disabled={!docAId || !docBId || docAId === docBId}
+          className="btn-primary flex items-center gap-2"
+          style={{ minHeight: '46px', padding: '0 1.5rem', fontSize: '0.9rem' }}
+        >
           <GitCompare className="w-4 h-4" /> Compare Selected Agreements
         </button>
       </div>

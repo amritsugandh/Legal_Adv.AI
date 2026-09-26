@@ -10,7 +10,7 @@ import json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy import select, func
 
 from app.config import settings, ensure_directories
@@ -157,9 +157,10 @@ if (frontend_dist / "index.html").exists():
 
     @app.get("/{full_path:path}")
     async def serve_frontend_spa(full_path: str):
-        # Exclude API endpoints and Swagger documentation
-        if full_path.startswith("api") or full_path.startswith("docs") or full_path == "openapi.json":
-            return {"detail": "Not Found"}
+        # Exclude API endpoints and Swagger documentation — use "api/" prefix
+        # to avoid matching paths like "apidocs" or "apikeys" that should be SPA routes.
+        if full_path.startswith("api/") or full_path in ("api", "docs", "redoc", "openapi.json"):
+            return JSONResponse({"detail": "Not Found"}, status_code=404)
         target_file = frontend_dist / full_path
         if full_path and target_file.is_file():
             return FileResponse(str(target_file))

@@ -21,8 +21,8 @@ RUN pip install --upgrade pip && \
 # Copy application source code
 COPY . .
 
-# Ensure storage directories exist
-RUN mkdir -p uploads chroma_db
+# Ensure storage directories exist (data/ holds the SQLite database)
+RUN mkdir -p uploads chroma_db data
 
 # Expose API port
 EXPOSE 8000

@@ -236,12 +236,19 @@ class DocumentProcessor:
         Raises:
             ValueError: If the file type is not supported.
         """
+        import asyncio
+
         ext = file_path.rsplit(".", 1)[-1].lower()
 
         if ext == "pdf":
             return await DocumentProcessor.extract_from_pdf(file_path)
         elif ext == "docx":
-            return DocumentProcessor.extract_from_docx(file_path)
+            # extract_from_docx is synchronous (python-docx / XML I/O); run it in a
+            # thread-pool executor so it doesn't block the asyncio event loop.
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(
+                None, DocumentProcessor.extract_from_docx, file_path
+            )
         else:
             raise ValueError(f"Unsupported file type: .{ext}")
 

@@ -4,6 +4,15 @@ Deep legal document analysis: clauses, risks, obligations, dates, terms.
 """
 
 from app.services.llm_service import llm_service
+from app.models.schemas import (
+    FullAnalysis,
+    RiskItem,
+    ObligationItem,
+    ImportantDate,
+    LegalTerm,
+    LawyerPrepReport,
+    LawyerPrepTopic,
+)
 from app.utils.prompts import (
     CLAUSE_EXPLANATION_PROMPT,
     RISK_ANALYSIS_PROMPT,
@@ -111,10 +120,10 @@ class AnalysisService:
                 "related_clauses": [],
             }
 
-    async def full_analysis(self, document_id: str, document_text: str) -> dict:
+    async def full_analysis(self, document_id: str, document_text: str) -> FullAnalysis:
         """Run all analysis modules on a document.
 
-        Returns a comprehensive analysis result with all extracted data.
+        Returns a FullAnalysis Pydantic model with all extracted data.
         """
         import asyncio
 
@@ -124,74 +133,92 @@ class AnalysisService:
         dates_task = self.extract_dates(document_text)
         terms_task = self.extract_legal_terms(document_text)
 
-        risks, obligations, dates, terms = await asyncio.gather(
+        risks_raw, obligations_raw, dates_raw, terms_raw = await asyncio.gather(
             risks_task, obligations_task, dates_task, terms_task,
             return_exceptions=True,
         )
 
-        # Handle any exceptions
-        if isinstance(risks, Exception):
-            risks = []
-        if isinstance(obligations, Exception):
-            obligations = []
-        if isinstance(dates, Exception):
-            dates = []
-        if isinstance(terms, Exception):
-            terms = []
+        # Handle any exceptions — fall back to empty lists
+        if isinstance(risks_raw, Exception):
+            risks_raw = []
+        if isinstance(obligations_raw, Exception):
+            obligations_raw = []
+        if isinstance(dates_raw, Exception):
+            dates_raw = []
+        if isinstance(terms_raw, Exception):
+            terms_raw = []
+
+        # Convert raw dicts → validated Pydantic models
+        risks = [RiskItem(**r) for r in (risks_raw if isinstance(risks_raw, list) else [])]
+        obligations = [ObligationItem(**o) for o in (obligations_raw if isinstance(obligations_raw, list) else [])]
+        dates = [ImportantDate(**d) for d in (dates_raw if isinstance(dates_raw, list) else [])]
+        legal_terms = [LegalTerm(**t) for t in (terms_raw if isinstance(terms_raw, list) else [])]
 
         # Generate action items from risks and obligations
-        action_items = []
-        for risk in (risks if isinstance(risks, list) else []):
-            check = risk.get("what_to_check")
-            if check:
-                action_items.append(check)
-        for ob in (obligations if isinstance(obligations, list) else []):
-            if ob.get("deadline") and ob.get("description"):
-                action_items.append(f"{ob['description']} — Deadline: {ob['deadline']}")
+        action_items: list[str] = []
+        for risk in risks:
+            if risk.what_to_check:
+                action_items.append(risk.what_to_check)
+        for ob in obligations:
+            if ob.deadline and ob.description:
+                action_items.append(f"{ob.description} — Deadline: {ob.deadline}")
 
-        return {
-            "document_id": document_id,
-            "clauses": [],  # Populated when clause-level analysis is invoked
-            "risks": risks,
-            "obligations": obligations,
-            "dates": dates,
-            "legal_terms": terms,
-            "action_items": action_items,
-        }
+        return FullAnalysis(
+            document_id=document_id,
+            clauses=[],  # Populated when clause-level analysis is invoked
+            risks=risks,
+            obligations=obligations,
+            dates=dates,
+            legal_terms=legal_terms,
+            action_items=action_items,
+        )
 
-    async def generate_lawyer_prep(self, document_text: str) -> dict:
+    async def generate_lawyer_prep(self, document_text: str) -> LawyerPrepReport:
         """Generate a Lawyer Preparation Report."""
         if len(document_text) > 20000:
             document_text = document_text[:15000] + "\n\n[...]\n\n" + document_text[-5000:]
 
         prompt = LAWYER_PREP_PROMPT.format(document_text=document_text)
         try:
-            return await self.llm.generate_json(prompt)
+            raw = await self.llm.generate_json(prompt)
+            # Normalise key_areas_to_discuss entries into LawyerPrepTopic models
+            raw_topics = raw.get("key_areas_to_discuss", [])
+            topics = [
+                LawyerPrepTopic(**t) if isinstance(t, dict) else t
+                for t in raw_topics
+            ]
+            return LawyerPrepReport(
+                document_title=raw.get("document_title", "Legal Agreement"),
+                key_areas_to_discuss=topics,
+                questions_to_ask=raw.get("questions_to_ask", []),
+                documents_to_bring=raw.get("documents_to_bring", []),
+                action_checklist=raw.get("action_checklist", []),
+            )
         except Exception:
-            return {
-                "document_title": "Legal Agreement",
-                "key_areas_to_discuss": [
-                    {"topic": "Termination & Notice", "clause_reference": "Termination Section", "why_discuss": "Clarify notice requirements and whether early exit triggers damages."},
-                    {"topic": "Liability & Indemnification", "clause_reference": "Liability Section", "why_discuss": "Verify if liability has an explicit monetary cap."},
-                    {"topic": "Dispute Resolution", "clause_reference": "Dispute / Governing Law", "why_discuss": "Confirm court jurisdiction or arbitration venue rules."},
+            return LawyerPrepReport(
+                document_title="Legal Agreement",
+                key_areas_to_discuss=[
+                    LawyerPrepTopic(topic="Termination & Notice", clause_reference="Termination Section", why_discuss="Clarify notice requirements and whether early exit triggers damages."),
+                    LawyerPrepTopic(topic="Liability & Indemnification", clause_reference="Liability Section", why_discuss="Verify if liability has an explicit monetary cap."),
+                    LawyerPrepTopic(topic="Dispute Resolution", clause_reference="Dispute / Governing Law", why_discuss="Confirm court jurisdiction or arbitration venue rules."),
                 ],
-                "questions_to_ask": [
+                questions_to_ask=[
                     "What happens if either party terminates without notice?",
                     "Is my financial liability capped under this agreement?",
                     "Are there post-termination obligations or restrictions I must comply with?",
                     "Does this contract automatically renew?",
                 ],
-                "documents_to_bring": [
+                documents_to_bring=[
                     "Full printed or digital copy of the agreement",
                     "Any previous versions or amendments",
                     "Written correspondence, emails, or offer letters",
                 ],
-                "action_checklist": [
+                action_checklist=[
                     "Highlight any uncertain definitions",
                     "Check dates against your calendar",
                     "Prepare your list of negotiation priorities",
                 ],
-            }
+            )
 
     async def rewrite_clause(
         self,
