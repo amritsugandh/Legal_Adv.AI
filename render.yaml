@@ -18,13 +18,10 @@ services:
         sync: false
 
   # 2. Frontend Static Site (React Vite)
-  - type: web
-    name: legallens-web
-    runtime: static
+      - type: static
+        name: legallens-web
     rootDir: frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    plan: free
     routes:
       - type: rewrite
         source: /*
