@@ -1,5 +1,13 @@
 import api from './api'
 
+// Get the absolute base URL for direct links (download, export)
+// Uses the same logic as api.js so links work both locally and on Vercel
+const getDirectBaseURL = () => {
+  if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL
+  if (import.meta.env.PROD) return 'https://legallens-api.onrender.com/api'
+  return '/api'
+}
+
 export const uploadDocument = async (file, documentType = null) => {
   const formData = new FormData()
   formData.append('file', file)
@@ -50,7 +58,9 @@ export const getSystemStatus = async () => {
   return data
 }
 
-export const getDownloadUrl = (id) => `/api/documents/${id}/download`
+// Direct URL links — must be absolute so browser can open/download them
+export const getDownloadUrl = (id) =>
+  `${getDirectBaseURL()}/documents/${id}/download`
 
 export const getRawText = async (id) => {
   const { data } = await api.get(`/documents/${id}/raw-text`)
@@ -66,4 +76,6 @@ export const rewriteClause = async (id, clauseText, targetStance = 'neutral_mutu
   return data
 }
 
-export const getLawyerPrepExportUrl = (id) => `/api/documents/${id}/export/lawyer-prep`
+// Direct URL link — must be absolute
+export const getLawyerPrepExportUrl = (id) =>
+  `${getDirectBaseURL()}/documents/${id}/export/lawyer-prep`
