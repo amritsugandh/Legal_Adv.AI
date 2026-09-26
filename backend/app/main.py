@@ -9,6 +9,8 @@ import json
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy import select, func
 
 from app.config import settings, ensure_directories
@@ -144,3 +146,22 @@ async def system_status():
         "total_documents": count,
         "llm": llm_info,
     }
+
+
+# ─── Production SPA Serving (Single-Platform Unified Deployment) ───
+
+frontend_dist = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
+if (frontend_dist / "index.html").exists():
+    if (frontend_dist / "assets").exists():
+        app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="static_assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_frontend_spa(full_path: str):
+        # Exclude API endpoints and Swagger documentation
+        if full_path.startswith("api") or full_path.startswith("docs") or full_path == "openapi.json":
+            return {"detail": "Not Found"}
+        target_file = frontend_dist / full_path
+        if full_path and target_file.is_file():
+            return FileResponse(str(target_file))
+        return FileResponse(str(frontend_dist / "index.html"))
+
