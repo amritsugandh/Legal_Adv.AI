@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     # Application
     APP_NAME: str = "LegalLens"
-    DEBUG: bool = True
+    DEBUG: bool = False
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
@@ -34,19 +34,21 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./legal_lens.db"
 
     # LLM Settings
-    LLM_MODEL: str = "gemini-1.5-flash"
+    LLM_MODEL: str = "gemini-2.0-flash"
     EMBEDDING_MODEL: str = "models/text-embedding-004"
 
-    # CORS — include all common dev ports
+    # CORS — includes all common dev ports + vercel wildcard pattern
+    # In production set CORS_ORIGINS env var to your exact Vercel URL
     CORS_ORIGINS: list[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:5174",
         "http://127.0.0.1:5174",
-        "http://localhost:5175",
-        "http://127.0.0.1:5175",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        # Vercel preview + production deployments
+        "https://legal-adv-kmyc9r1re-amritsugandhs-projects.vercel.app",
+        "https://legal-adv-ai.vercel.app",
     ]
 
     model_config = SettingsConfigDict(
