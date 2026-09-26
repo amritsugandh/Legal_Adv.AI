@@ -20,9 +20,10 @@ services:
   # 2. Frontend Static Site (React Vite)
       - type: static
         name: legallens-web
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    routes:
-      - type: rewrite
-        source: /*
+        rootDir: frontend
+        buildCommand: npm install && npm run build
+        routes:
+          - type: rewrite
+            source: /*
+                    stination: /index.html
         destination: /index.html
