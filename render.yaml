@@ -15,7 +15,7 @@ services:
       - key: PYTHON_VERSION
         value: "3.11.0"
       - key: GOOGLE_API_KEY
-        sync: false
+          sync: false
 
   # 2. Frontend Static Site (React Vite)
       - type: static
