@@ -25,5 +25,5 @@ services:
         routes:
           - type: rewrite
             source: /*
-                    stination: /index.html
+                          
         destination: /index.html
