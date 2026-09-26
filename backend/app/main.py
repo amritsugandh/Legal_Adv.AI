@@ -6,7 +6,10 @@ Main application with CORS, startup, and router registration.
 from contextlib import asynccontextmanager
 from pathlib import Path
 import json
+import asyncio
+import logging
 
+import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -18,6 +21,8 @@ from app.db.database import init_db, AsyncSessionLocal
 from app.db.models import DocumentRecord
 from app.services.llm_service import llm_service
 from app.routers import documents, chat, comparison
+
+logger = logging.getLogger(__name__)
 
 
 async def _backfill_legacy_disk_documents():
@@ -72,6 +77,23 @@ async def _backfill_legacy_disk_documents():
                 await session.rollback()
 
 
+async def _keep_alive_loop():
+    """Ping our own /health endpoint every 10 minutes to prevent
+    Render free-tier spin-down. Only runs when not in debug mode."""
+    if settings.DEBUG:
+        return
+    await asyncio.sleep(60)  # wait 1 min after startup before first ping
+    while True:
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                port = settings.PORT
+                resp = await client.get(f"http://localhost:{port}/health")
+                logger.info(f"[LegalLens] Keep-alive ping: {resp.status_code}")
+        except Exception as e:
+            logger.warning(f"[LegalLens] Keep-alive ping failed: {e}")
+        await asyncio.sleep(600)  # 10 minutes
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application startup and shutdown lifecycle."""
@@ -83,8 +105,18 @@ async def lifespan(app: FastAPI):
     print(f"[LegalLens] Upload directory: {settings.UPLOAD_DIR}")
     print(f"[LegalLens] LLM Model: {settings.LLM_MODEL}")
     print(f"[LegalLens] Vector DB: {settings.CHROMA_PERSIST_DIR}")
+
+    # Start background keep-alive task (production only)
+    keep_alive_task = asyncio.create_task(_keep_alive_loop())
+
     yield
+
     # Shutdown
+    keep_alive_task.cancel()
+    try:
+        await keep_alive_task
+    except asyncio.CancelledError:
+        pass
     print(f"[LegalLens] backend shutting down...")
 
 
